@@ -5,7 +5,11 @@ A domain-specific-language to select commits in a git repo. Similar to
 
 See the crate documentation for supported functions and operators. More functions might be added over time.
 
-## Example Revsets
+`gitrevset` provides the Rust library interface. There is also a simple command-line utility `git-revs`. It takes revset expressions as arguments, and outputs commit hashes.
+
+## Examples
+
+### Revset Expressions
 
 The current commit (HEAD) and its parent:
 
@@ -27,7 +31,7 @@ Heads of local (draft) commits, excluding commits with "fixup" in message and th
 
     heads(draft() - (draft() & desc(fixup))::)
 
-## Example Usage
+### Using `gitrevset` Library
 
 ```rust
 use gitrevset::{Repo, SetExt};
@@ -37,4 +41,10 @@ let set = repo.revs("(draft() & ::.)^ + .")?;
 for oid in set.to_oids()? {
     dbg!(oid?)
 }
+```
+
+### Using `git-revs` CLI
+
+```bash
+git revs "(draft() & ::.)^ + ."
 ```

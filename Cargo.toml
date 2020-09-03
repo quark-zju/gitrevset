@@ -23,3 +23,7 @@ tempfile = "3"
 [features]
 default = []
 testutil = ["drawdag", "tempfile"]
+
+[[bin]]
+name = "git-revs"
+path = "src/bin/git-revs.rs"
