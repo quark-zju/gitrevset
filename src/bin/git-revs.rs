@@ -1,14 +1,26 @@
+use gitrevset::Expr;
 use gitrevset::Repo;
 use gitrevset::Result;
+use std::convert::TryInto;
 use std::env;
 
-fn try_main()-> Result<()> {
+fn try_main() -> Result<()> {
     let repo = Repo::open_from_env()?;
+    let mut print_ast = false;
     for arg in env::args().skip(1) {
         let arg: &str = &arg;
-        let set = repo.revs(arg)?;
-        for v in set.iter()? {
-            println!("{}", v?.to_hex());
+        if arg == "--ast" {
+            print_ast = true;
+            continue;
+        }
+        if print_ast {
+            let ast: Expr = arg.try_into()?;
+            println!("{:?}", ast);
+        } else {
+            let set = repo.revs(arg)?;
+            for v in set.iter()? {
+                println!("{}", v?.to_hex());
+            }
         }
     }
     Ok(())
