@@ -58,6 +58,8 @@ fn test_revset_functions() {
     repo.add_ref("refs/heads/master", repo.query_single_oid("E"));
     repo.add_ref("refs/remotes/origin/master", repo.query_single_oid("D"));
     repo.add_ref("refs/remotes/origin/stable", repo.query_single_oid("B"));
+    repo.add_ref("refs/tags/v1", repo.query_single_oid("A"));
+    repo.add_ref("refs/tags/v2", repo.query_single_oid("B"));
 
     assert_eq!(repo.query("origin/master"), ["D"]);
     assert_eq!(repo.query("draft()"), ["E", "I", "H"]);
@@ -65,14 +67,18 @@ fn test_revset_functions() {
     assert_eq!(repo.query("drafthead()"), ["E", "I"]);
     assert_eq!(repo.query("publichead()"), ["D", "B"]);
 
-    // id(), ref(), "."
+    // id(), ref(), tag(), "."
     for name in repo.query("all()") {
         let rev_code = format!("id({})", repo.query_single_oid(&name).to_vertex().to_hex());
         assert_eq!(repo.query(&rev_code), [name.clone()]);
     }
+    assert_eq!(repo.query("ref()"), ["E", "I", "H", "D", "G", "F", "C", "B", "A"]);
     assert_eq!(repo.query("ref(origin/master)"), ["D"]);
     assert_eq!(repo.query(r#"ref("remotes/origin/*")"#), ["D", "B"]);
     assert_eq!(repo.query("."), ["E"]);
+    assert_eq!(repo.query("tag()"), ["B", "A"]);
+    assert_eq!(repo.query("tag(v2)"), ["B"]);
+    assert_eq!(repo.query(r#"tag("v*")"#), ["B", "A"]);
 
     // predecessors(), successors()
     repo.amend("refs/heads/H");

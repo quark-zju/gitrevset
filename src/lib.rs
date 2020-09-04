@@ -42,8 +42,10 @@
 //! - `successors(x)`: Newer versions of `x`, including `x`.
 //! - `obsolete()`: Commits with at least one newer versions.
 //! - `id(hexhash)`: Resolve a commit explicitly by a hex hash string.
-//! - `ref(name)`: Resolve commits explicitly by a reference name or glob
-//!   pattern.
+//! - `ref()`: All references.
+//! - `ref(name)`: Resolve commits by a reference name or glob.
+//! - `tag()`: All tags.
+//! - `tag(name)`: Resolve commits by a tag name or glob.
 //!
 //! Differences from Mercurial:
 //! 1. `x + y` does not make sure `y` comes after `x`. For example,

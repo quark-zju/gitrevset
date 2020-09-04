@@ -101,6 +101,7 @@ fn get_function<'a>(
         "obsolete" => Ok(&obsolete),
         "id" => Ok(&id),
         "ref" => Ok(&r#ref),
+        "tag" => Ok(&r#tag),
         _ => Err(Error::UnresolvedName(name.to_string())),
     }
 }
@@ -404,6 +405,29 @@ fn id(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<
     }
 }
 
+fn resolve_precise_name(repo: &Repo, candidates: &[String]) -> Result<Option<Set>> {
+    let refs = repo.dag().git_references();
+    for name in candidates.iter() {
+        if let Some(v) = refs.get(name) {
+            return Ok(Some(repo.to_set(std::iter::once(v.clone()))?));
+        }
+    }
+    Ok(None)
+}
+
+fn resolve_glob_name(repo: &Repo, glob: &str) -> Result<Option<Set>> {
+    let refs = repo.dag().git_references();
+    if let Ok(glob) = Glob::new(&format!("refs/{}", glob)) {
+        let matcher = glob.compile_matcher();
+        let iter = refs
+            .iter()
+            .filter(|(k, _)| matcher.is_match(k))
+            .map(|(_, v)| v.clone());
+        return Ok(Some(repo.to_set(iter)?));
+    }
+    Ok(None)
+}
+
 fn r#ref(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
     let refs = repo.dag().git_references();
     // No arguments: all references.
@@ -420,21 +444,43 @@ fn r#ref(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Resu
             format!("refs/tags/{}", name),
             format!("refs/remotes/{}", name),
         ];
-        for name in candidates.iter() {
-            if let Some(v) = refs.get(name) {
-                return repo.to_set(std::iter::once(v.clone()));
-            }
+        if let Some(set) = resolve_precise_name(repo, &candidates)? {
+            return Ok(set);
         }
     }
     // Try glob pattern lookup.
     if func_name != "lookup" && name.contains('*') {
-        if let Ok(glob) = Glob::new(&format!("refs/{}", name)) {
-            let matcher = glob.compile_matcher();
-            let iter = refs
-                .iter()
-                .filter(|(k, _)| matcher.is_match(k))
-                .map(|(_, v)| v.clone());
-            return repo.to_set(iter);
+        if let Some(set) = resolve_glob_name(repo, &name)? {
+            return Ok(set);
+        }
+    }
+    Err(Error::UnresolvedName(name))
+}
+
+fn tag(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    let refs = repo.dag().git_references();
+    // No arguments: all tags.
+    if args.len() == 0 {
+        return repo.to_set(refs.iter().filter_map(|(name, vertex)| {
+            if name.starts_with("refs/tags/") {
+                Some(vertex.clone())
+            } else {
+                None
+            }
+        }));
+    }
+    ensure_arg_count(func_name, args, 1, context)?;
+    let name = resolve_string(&args[0])?;
+    // Try precise lookup.
+    let ref_name = format!("refs/tags/{}", name);
+    if let Some(vertex) = refs.get(&ref_name) {
+        return Ok(repo.to_set(std::iter::once(vertex.clone()))?);
+    }
+    // Try glob pattern lookup.
+    if func_name != "lookup" && name.contains('*') {
+        let tag_glob = format!("tags/{}", name);
+        if let Some(set) = resolve_glob_name(repo, &tag_glob)? {
+            return Ok(set);
         }
     }
     Err(Error::UnresolvedName(name))
