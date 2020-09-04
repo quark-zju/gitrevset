@@ -72,7 +72,10 @@ fn test_revset_functions() {
         let rev_code = format!("id({})", repo.query_single_oid(&name).to_vertex().to_hex());
         assert_eq!(repo.query(&rev_code), [name.clone()]);
     }
-    assert_eq!(repo.query("ref()"), ["E", "I", "H", "D", "G", "F", "C", "B", "A"]);
+    assert_eq!(
+        repo.query("ref()"),
+        ["E", "I", "H", "D", "G", "F", "C", "B", "A"]
+    );
     assert_eq!(repo.query("ref(origin/master)"), ["D"]);
     assert_eq!(repo.query(r#"ref("remotes/origin/*")"#), ["D", "B"]);
     assert_eq!(repo.query("."), ["E"]);

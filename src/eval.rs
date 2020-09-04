@@ -7,9 +7,9 @@ use dag::ops::PrefixLookup;
 use dag::Set;
 use dag::Vertex;
 use gitdag::dag;
-use hgtime::HgTime;
 use gitdag::git2;
 use globset::Glob;
+use hgtime::HgTime;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -316,7 +316,12 @@ fn date(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Resul
     let date_str = resolve_string(&args[0])?;
     let date_range = match HgTime::parse_range(&date_str) {
         Some(range) => range.start.unixtime..=range.end.unixtime,
-        None => return Err(crate::Error::ParseError(format!("invalid date: {}", date_str))),
+        None => {
+            return Err(crate::Error::ParseError(format!(
+                "invalid date: {}",
+                date_str
+            )))
+        }
     };
     filter_set(repo, move |commit| {
         let author = commit.author();
@@ -330,7 +335,12 @@ fn committer_date(func_name: &str, repo: &Repo, args: &[Expr], context: &Context
     let date_str = resolve_string(&args[0])?;
     let date_range = match HgTime::parse_range(&date_str) {
         Some(range) => range.start.unixtime..=range.end.unixtime,
-        None => return Err(crate::Error::ParseError(format!("invalid date: {}", date_str))),
+        None => {
+            return Err(crate::Error::ParseError(format!(
+                "invalid date: {}",
+                date_str
+            )))
+        }
     };
     filter_set(repo, move |commit| {
         let committer = commit.committer();

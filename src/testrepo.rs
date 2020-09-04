@@ -2,8 +2,8 @@ use crate::git2;
 use crate::Repo;
 use crate::SetExt;
 use git2::Oid;
-use std::ops::Deref;
 use gitdag::dag::Set;
+use std::ops::Deref;
 
 /// Repo for testing purpose.
 pub struct TestRepo {
