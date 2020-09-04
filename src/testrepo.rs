@@ -3,6 +3,7 @@ use crate::Repo;
 use crate::SetExt;
 use git2::Oid;
 use std::ops::Deref;
+use gitdag::dag::Set;
 
 /// Repo for testing purpose.
 pub struct TestRepo {
@@ -55,8 +56,13 @@ impl TestRepo {
 
     /// Run revset query. Return commit messages.
     pub fn query(&self, code: &str) -> Vec<String> {
+        self.desc_set(&self.revs(code).unwrap())
+    }
+
+    /// Set -> Commit messages.
+    pub fn desc_set(&self, set: &Set) -> Vec<String> {
         let mut result = Vec::new();
-        for oid in self.revs(code).unwrap().to_oids().unwrap() {
+        for oid in set.to_oids().unwrap() {
             let oid = oid.unwrap();
             let commit = self.git_repo().find_commit(oid).unwrap();
             let message = commit.message().unwrap();

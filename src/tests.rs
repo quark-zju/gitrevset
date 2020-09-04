@@ -48,7 +48,10 @@ fn test_revset_functions() {
     // date(), committerdate()
     assert_eq!(repo.query(r#"date("0 0")"#), ["B", "A"]);
     assert_eq!(repo.query(r#"date("0 0 to 1 0")"#), ["C", "B", "A"]);
-    assert_eq!(repo.query(r#"committerdate("before 2 0")"#), ["C", "B", "A"]);
+    assert_eq!(
+        repo.query(r#"committerdate("before 2 0")"#),
+        ["C", "B", "A"]
+    );
     assert_eq!(repo.query(r#"committerdate("since 6 0")"#), ["I", "E", "D"]);
 
     // public(), draft()
@@ -87,11 +90,33 @@ fn test_ast_macro() {
     assert_eq!(f(ast!("foo")), "foo");
     assert_eq!(f(ast!(parents("foo"))), "parents(foo)");
     assert_eq!(f(ast!(draft())), "draft()");
-    assert_eq!(f(ast!(union(draft(), public()))), "union(draft(), public())");
+    assert_eq!(
+        f(ast!(union(draft(), public()))),
+        "union(draft(), public())"
+    );
 
     let name = "foo";
-    assert_eq!(f(ast!(union(desc({ name }), author({ "bar" })))), "union(desc(foo), author(bar))");
+    assert_eq!(
+        f(ast!(union(desc({ name }), author({ "bar" })))),
+        "union(desc(foo), author(bar))"
+    );
 
     let set = Set::from_static_names(vec!["A".into(), "B".into()]);
     assert_eq!(f(ast!(parents({ set }))), "parents(<static [A, B]>)")
+}
+
+#[test]
+fn test_ast_repo() -> crate::Result<()> {
+    use crate::ast;
+    let mut repo = TestRepo::new();
+    repo.drawdag("A-B-C-D");
+    repo.add_ref("refs/heads/master", repo.query_single_oid("D"));
+    repo.add_ref("refs/remotes/origin/master", repo.query_single_oid("B"));
+
+    let master = "origin/master";
+    let stack = repo.revs(ast!(only(".", ref({ master })))).unwrap();
+    assert_eq!(repo.desc_set(&stack), ["D", "C"]);
+    let head = repo.revs(ast!(heads({ stack }))).unwrap();
+    assert_eq!(repo.desc_set(&head), ["D"]);
+    Ok(())
 }
