@@ -1,7 +1,6 @@
 use gitrevset::Expr;
 use gitrevset::Repo;
 use gitrevset::Result;
-use std::convert::TryInto;
 use std::env;
 
 fn try_main() -> Result<()> {
@@ -14,7 +13,7 @@ fn try_main() -> Result<()> {
             continue;
         }
         if print_ast {
-            let ast: Expr = arg.try_into()?;
+            let ast = Expr::parse(arg)?;
             println!("{:?}", ast);
         } else {
             let set = repo.revs(arg)?;

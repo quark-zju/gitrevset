@@ -1,5 +1,5 @@
 use crate::ast::Expr;
-use crate::Error;
+use crate::ast::ParseToExpr;
 use crate::EvalContext;
 use crate::Result;
 use dag::namedag::MemNameDag;
@@ -11,8 +11,6 @@ use gitdag::git2;
 use gitdag::GitDag;
 use once_cell::sync::OnceCell;
 use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::sync::Mutex;
 
 /// Repo with extra states to support revset queries.
@@ -54,7 +52,7 @@ impl Repo {
 
     /// Evaluate the expression. Return the resulting set.
     /// User-defined aliases are ignored.
-    pub fn revs<E: Into<Error>>(&self, ast: impl TryInto<Expr, Error = E>) -> Result<Set> {
+    pub fn revs(&self, ast: impl ParseToExpr) -> Result<Set> {
         self.revs_with_context(ast, &Default::default())
     }
 
@@ -68,18 +66,14 @@ impl Repo {
     /// # f(x) can be used, and will be expended to ancestor(x) + x.
     /// f = ancestor($1) + $1
     /// ```
-    pub fn anyrevs<E: Into<Error>>(&self, ast: impl TryInto<Expr, Error = E>) -> Result<Set> {
+    pub fn anyrevs(&self, ast: impl ParseToExpr) -> Result<Set> {
         self.revs_with_context(ast, self.eval_context_from_config()?)
     }
 
     /// Evaluate the expression with the given context.
     /// Return the resulting set.
-    pub fn revs_with_context<E: Into<Error>>(
-        &self,
-        ast: impl TryInto<Expr, Error = E>,
-        ctx: &EvalContext,
-    ) -> Result<Set> {
-        let ast = ast.try_into().map_err(|e| e.into())?;
+    pub fn revs_with_context(&self, ast: impl ParseToExpr, ctx: &EvalContext) -> Result<Set> {
+        let ast = ast.parse_to_expr()?;
         crate::eval::eval(self, &ast, ctx)
     }
 
@@ -154,7 +148,7 @@ fn parse_eval_context(repo: &git2::Repository) -> Result<EvalContext> {
         let entry = entry?;
         if let (Some(name), Some(value)) = (entry.name(), entry.value()) {
             if let Some(name) = name.get("revsetalias.".len()..) {
-                if let Ok(ast) = Expr::try_from(value) {
+                if let Ok(ast) = value.parse_to_expr() {
                     let func = move |_name: &str,
                                      repo: &Repo,
                                      args: &[Expr],

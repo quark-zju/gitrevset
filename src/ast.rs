@@ -1,7 +1,6 @@
 use crate::Error;
 use crate::Result;
 use std::borrow::Cow;
-use std::convert::TryFrom;
 use std::fmt;
 
 /// A node in the parsed AST.
@@ -52,13 +51,28 @@ impl Expr {
             }
         }
     }
+
+    /// Parse AST from a string.
+    pub fn parse(s: &str) -> Result<Self> {
+        crate::parser::parse(s).map_err(|e| Error::ParseError(e.to_string()))
+    }
 }
 
-impl TryFrom<&str> for Expr {
-    type Error = Error;
+/// Convert to `Expr` by parsing.
+pub trait ParseToExpr {
+    /// Convert to `Expr` by parsing.
+    fn parse_to_expr(self) -> Result<Expr>;
+}
 
-    fn try_from(s: &str) -> Result<Self> {
-        crate::parser::parse(s).map_err(|e| Error::ParseError(e.to_string()))
+impl ParseToExpr for &str {
+    fn parse_to_expr(self) -> Result<Expr> {
+        Expr::parse(self)
+    }
+}
+
+impl ParseToExpr for Expr {
+    fn parse_to_expr(self) -> Result<Expr> {
+        Ok(self)
     }
 }
 
