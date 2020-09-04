@@ -133,14 +133,15 @@ impl From<Set> for Expr {
 /// # let mut repo = gitrevset::TestRepo::new();
 /// # repo.drawdag("A--B");
 /// let head = repo.revs(ast!(head()))?;
-/// let parents = repo.revs(ast!(parents({ head })))?;
+/// let set = repo.revs(ast!(parents({ head })))?;
+///
 /// // The above is similar to using raw `dag` APIs:
-/// let parents2 = {
+/// let set2 = {
 ///     let dag = repo.dag();
 ///     dag.parents(dag.heads(dag.all()?)?)?
 /// };
-/// assert_eq!((parents2.clone() - parents.clone()).count()?, 0);
-/// assert_eq!((parents.clone() - parents2.clone()).count()?, 0);
+/// # assert_eq!((set2.clone() - set.clone()).count()?, 0);
+/// # assert_eq!((set.clone() - set2.clone()).count()?, 0);
 /// # }
 /// # Ok(())
 /// # }

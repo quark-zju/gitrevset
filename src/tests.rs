@@ -62,9 +62,9 @@ fn test_revset_functions() {
     assert_eq!(repo.query("drafthead()"), ["E", "I"]);
     assert_eq!(repo.query("publichead()"), ["D", "B"]);
 
-    // rev(), ref(), "."
+    // id(), ref(), "."
     for name in repo.query("all()") {
-        let rev_code = format!("rev({})", repo.query_single_oid(&name).to_vertex().to_hex());
+        let rev_code = format!("id({})", repo.query_single_oid(&name).to_vertex().to_hex());
         assert_eq!(repo.query(&rev_code), [name.clone()]);
     }
     assert_eq!(repo.query("ref(origin/master)"), ["D"]);

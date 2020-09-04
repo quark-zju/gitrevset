@@ -57,7 +57,7 @@ fn lookup(repo: &Repo, name: &str, context: &Context) -> Result<Set> {
     }
 
     // Resolve as commit hash.
-    rev("lookup", repo, &args, context)
+    id("lookup", repo, &args, context)
 }
 
 /// Resolve a function name.
@@ -99,8 +99,7 @@ fn get_function<'a>(
         "predecessors" => Ok(&predecessors),
         "successors" => Ok(&successors),
         "obsolete" => Ok(&obsolete),
-        "rev" => Ok(&rev),
-        "commit" => Ok(&rev),
+        "id" => Ok(&id),
         "ref" => Ok(&r#ref),
         _ => Err(Error::UnresolvedName(name.to_string())),
     }
@@ -381,7 +380,7 @@ fn obsolete(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> R
     Ok(repo.dag().sort(&set)?.flatten()?)
 }
 
-fn rev(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+fn id(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
     ensure_arg_count(func_name, args, 1, context)?;
     let name = resolve_string(&args[0])?;
     match name.as_ref() {

@@ -41,7 +41,7 @@
 //! - `predecessors(x)`: Previous versions of `x`, including `x`.
 //! - `successors(x)`: Newer versions of `x`, including `x`.
 //! - `obsolete()`: Commits with at least one newer versions.
-//! - `rev(hexhash)`: Resolve a commit explicitly by a hex hash string.
+//! - `id(hexhash)`: Resolve a commit explicitly by a hex hash string.
 //! - `ref(name)`: Resolve commits explicitly by a reference name or glob
 //!   pattern.
 //!
