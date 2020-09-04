@@ -9,7 +9,7 @@ repository = "https://github.com/quark-zju/gitrevset"
 
 [dependencies]
 drawdag = { package = "esl01-drawdag", version = "0.1", optional = true }
-gitdag = "0.1.1"
+gitdag = "0.1.2"
 globset = "0.4"
 hgtime = { package = "esl01-hgtime", version = "0.1" }
 lalrpop-util = { version = "0.19", features = ["lexer"] }
