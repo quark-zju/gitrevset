@@ -23,13 +23,13 @@ The bottom of the current local (draft) branch:
 
     roots(draft() & ::.)
 
+Tagged commits since 100 days ago:
+
+    tag() & date("since 100 days ago")
+
 Commits by "alice" or "bob" in the "dev" but not "master" branch:
 
     (dev % master) & (author(alice) | author(bob))
-
-Heads of local (draft) commits, excluding commits with "fixup" in message and their descendants:
-
-    heads(draft() - (draft() & desc(fixup))::)
 
 ### Using `gitrevset` Library
 
