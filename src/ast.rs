@@ -1,5 +1,6 @@
 use crate::Error;
 use crate::Result;
+use gitdag::dag::Set;
 use std::borrow::Cow;
 use std::fmt;
 
@@ -11,6 +12,9 @@ pub enum Expr {
 
     /// A function call.
     Fn(Cow<'static, str>, Vec<Expr>),
+
+    /// An inlined Set.
+    Inlined(Set),
 }
 
 impl fmt::Debug for Expr {
@@ -29,8 +33,15 @@ impl fmt::Debug for Expr {
                     list.finish()?;
                 }
             }
+            Expr::Inlined(set) => set.fmt(f)?,
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
     }
 }
 
@@ -49,6 +60,7 @@ impl Expr {
                     arg.replace(from, to);
                 }
             }
+            Expr::Inlined(_) => (),
         }
     }
 
@@ -82,7 +94,56 @@ impl From<&str> for Expr {
     }
 }
 
-/// Construct an AST statically.
+impl From<Set> for Expr {
+    fn from(s: Set) -> Expr {
+        Expr::Inlined(s)
+    }
+}
+
+/// Construct an AST statically. This can be useful to avoid escaping issues
+/// parsing strings.
+///
+/// # Example
+///
+/// ```
+/// # use gitrevset::ast;
+/// let expr = ast!(union(draft(), desc("foo")));
+/// assert_eq!(expr.to_string(), "union(draft(), desc(foo))");
+/// ```
+///
+/// Use `{ ... }` to refer to local variables:
+///
+/// ```
+/// # use gitrevset::ast;
+/// let name = "origin/master";
+/// let expr = ast!(ref({ name }));
+/// assert_eq!(expr.to_string(), "ref(origin/master)");
+/// let nested = ast!(parents({ expr }));
+/// assert_eq!(nested.to_string(), "parents(ref(origin/master))");
+/// ```
+///
+/// `Set` can also be referred:
+///
+/// ```
+/// # fn main() -> gitrevset::Result<()> {
+/// # #[cfg(feature = "testutil")]
+/// # {
+/// # use gitrevset::ast;
+/// # use gitrevset::dag::DagAlgorithm;
+/// # let mut repo = gitrevset::TestRepo::new();
+/// # repo.drawdag("A--B");
+/// let head = repo.revs(ast!(head()))?;
+/// let parents = repo.revs(ast!(parents({ head })))?;
+/// // The above is similar to using raw `dag` APIs:
+/// let parents2 = {
+///     let dag = repo.dag();
+///     dag.parents(dag.heads(dag.all()?)?)?
+/// };
+/// assert_eq!((parents2.clone() - parents.clone()).count()?, 0);
+/// assert_eq!((parents.clone() - parents2.clone()).count()?, 0);
+/// # }
+/// # Ok(())
+/// # }
 #[macro_export]
 macro_rules! ast {
     ($v:literal) => { $crate::Expr::Name($v.to_string()) };

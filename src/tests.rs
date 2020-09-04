@@ -1,5 +1,6 @@
 use crate::ext::OidExt;
 use crate::testrepo::TestRepo;
+use gitdag::dag::Set;
 
 #[test]
 fn test_revset_functions() {
@@ -91,4 +92,6 @@ fn test_ast_macro() {
     let name = "foo";
     assert_eq!(f(ast!(union(desc({ name }), author({ "bar" })))), "union(desc(foo), author(bar))");
 
+    let set = Set::from_static_names(vec!["A".into(), "B".into()]);
+    assert_eq!(f(ast!(parents({ set }))), "parents(<static [A, B]>)")
 }

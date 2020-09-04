@@ -38,6 +38,7 @@ pub fn eval(repo: &Repo, expr: &Expr, context: &Context) -> Result<Set> {
             let func = get_function(name, context)?;
             func(name, repo, args, context)
         }
+        Expr::Inlined(set) => Ok(set.clone()),
     }
 }
 
