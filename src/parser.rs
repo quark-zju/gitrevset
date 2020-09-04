@@ -2,6 +2,7 @@ use crate::ast::Expr;
 use lalrpop_util::lexer::Token;
 use lalrpop_util::ParseError;
 
+#[rustfmt::skip]
 mod grammar;
 
 /// Parse a string into an AST.
