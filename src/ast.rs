@@ -76,6 +76,12 @@ impl ParseToExpr for Expr {
     }
 }
 
+impl From<&str> for Expr {
+    fn from(s: &str) -> Expr {
+        Expr::Name(s.to_string())
+    }
+}
+
 /// Construct an AST statically.
 #[macro_export]
 macro_rules! ast {
@@ -84,4 +90,5 @@ macro_rules! ast {
         let args = vec![ $(ast!($arg $( $subargs )?),)* ];
         $crate::Expr::Fn(stringify!($fname).into(), args)
     }};
+    {$v:expr} => { $crate::Expr::from($v) };
 }

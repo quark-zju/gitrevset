@@ -88,4 +88,7 @@ fn test_ast_macro() {
     assert_eq!(f(ast!(draft())), "draft()");
     assert_eq!(f(ast!(union(draft(), public()))), "union(draft(), public())");
 
+    let name = "foo";
+    assert_eq!(f(ast!(union(desc({ name }), author({ "bar" })))), "union(desc(foo), author(bar))");
+
 }
