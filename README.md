@@ -33,6 +33,8 @@ Heads of local (draft) commits, excluding commits with "fixup" in message and th
 
 ### Using `gitrevset` Library
 
+Parse revset from a string at runtime. Execute it and iterate through the `Oid`s:
+
 ```rust
 use gitrevset::{Repo, SetExt};
 
@@ -41,6 +43,17 @@ let set = repo.revs("(draft() & ::.)^ + .")?;
 for oid in set.to_oids()? {
     dbg!(oid?)
 }
+```
+
+Parse at compile time. Interact with local variables like strings, or calculated set:
+
+```rust
+use gitrevset::{ast, Repo};
+
+let repo = Repo::open_from_env()?;
+let master = "origin/master";
+let stack = repo.revs(ast!(only(".", ref({ master }))))?;
+let head = repo.revs(ast!(heads({ stack })))?;
 ```
 
 ### Using `git-revs` CLI

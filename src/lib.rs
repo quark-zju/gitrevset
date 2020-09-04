@@ -116,6 +116,9 @@
 //! # }
 //! ```
 //!
+//! To parse the revset expression at compile time, to avoid issues about
+//! string escaping or injection, use the [`ast!`](macro.ast.html) macro.
+//!
 //! ## Note on Commit Graph Index
 //!
 //! `gitrevset` takes advantage of the commit graph index from the
