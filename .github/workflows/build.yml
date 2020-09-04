@@ -20,5 +20,5 @@ jobs:
       run: cargo build --verbose
     - name: Test
       run: cargo test --verbose
-    - name: Test without features
-      run: cargo test --verbose --no-default-features
+    - name: Test with features
+      run: cargo test --verbose --features testutil
