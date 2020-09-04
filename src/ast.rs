@@ -61,3 +61,13 @@ impl TryFrom<&str> for Expr {
         crate::parser::parse(s).map_err(|e| Error::ParseError(e.to_string()))
     }
 }
+
+/// Construct an AST statically.
+#[macro_export]
+macro_rules! ast {
+    ($v:literal) => { $crate::Expr::Name($v.to_string()) };
+    ($fname:ident ( $($arg:tt $( $subargs:tt )? ),* )) => {{
+        let args = vec![ $(ast!($arg $( $subargs )?),)* ];
+        $crate::Expr::Fn(stringify!($fname).into(), args)
+    }};
+}

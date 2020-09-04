@@ -78,3 +78,14 @@ fn test_revset_functions() {
     assert_eq!(repo.query("successors(H_old)"), ["H_new", "H"]);
     assert_eq!(repo.query("obsolete()"), ["H"]);
 }
+
+#[test]
+fn test_ast_macro() {
+    use crate::ast;
+    let f = |e| format!("{:?}", e);
+    assert_eq!(f(ast!("foo")), "foo");
+    assert_eq!(f(ast!(parents("foo"))), "parents(foo)");
+    assert_eq!(f(ast!(draft())), "draft()");
+    assert_eq!(f(ast!(union(draft(), public()))), "union(draft(), public())");
+
+}
