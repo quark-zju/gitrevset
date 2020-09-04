@@ -22,6 +22,7 @@ impl TestRepo {
     /// Add commits using the ASCII graph.
     pub fn drawdag(&mut self, ascii: &str) {
         let repo = self.repo.git_repo();
+        let mut epoch = 0;
         drawdag::drawdag(
             ascii,
             |name: String, parents: Vec<Box<[u8]>>| -> Box<[u8]> {
@@ -33,7 +34,8 @@ impl TestRepo {
                     })
                     .collect();
                 let parent_refs: Vec<_> = parents.iter().collect();
-                let time = git2::Time::new(0, 0);
+                let time = git2::Time::new(epoch, 0);
+                epoch += 1;
                 let sig = git2::Signature::new(&name, "test@example.com", &time).unwrap();
                 let mut tree_builder = repo.treebuilder(None).unwrap();
                 let blob_oid = repo.blob(name.as_bytes()).unwrap();

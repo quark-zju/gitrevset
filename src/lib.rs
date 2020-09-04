@@ -35,6 +35,8 @@
 //! - `draft()`: Commits only reachable from draft heads, `all() - public()`.
 //! - `author(name)`: Filter by author name or email.
 //! - `committer(name)`: Filter by committer name or email.
+//! - `date(date)`: Filter by author date.
+//! - `committerdate(date)`: Filter by committer date.
 //! - `desc(text)`: Filter by commit message.
 //! - `predecessors(x)`: Previous versions of `x`, including `x`.
 //! - `successors(x)`: Newer versions of `x`, including `x`.

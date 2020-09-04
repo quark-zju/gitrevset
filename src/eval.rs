@@ -7,6 +7,7 @@ use dag::ops::PrefixLookup;
 use dag::Set;
 use dag::Vertex;
 use gitdag::dag;
+use hgtime::HgTime;
 use gitdag::git2;
 use globset::Glob;
 use std::collections::HashMap;
@@ -90,7 +91,9 @@ fn get_function<'a>(
         "public" => Ok(&public),
         "draft" => Ok(&draft),
         "author" => Ok(&author),
+        "date" => Ok(&date),
         "committer" => Ok(&committer),
+        "committerdate" => Ok(&committer_date),
         "desc" => Ok(&desc),
         "predecessors" => Ok(&predecessors),
         "successors" => Ok(&successors),
@@ -304,6 +307,34 @@ fn author(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Res
     filter_set(repo, move |commit| {
         let author = commit.author();
         author.name().unwrap_or("").contains(&name) || author.email().unwrap_or("").contains(&name)
+    })
+}
+
+fn date(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    ensure_arg_count(func_name, args, 1, context)?;
+    let date_str = resolve_string(&args[0])?;
+    let date_range = match HgTime::parse_range(&date_str) {
+        Some(range) => range.start.unixtime..=range.end.unixtime,
+        None => return Err(crate::Error::ParseError(format!("invalid date: {}", date_str))),
+    };
+    filter_set(repo, move |commit| {
+        let author = commit.author();
+        let epoch = author.when().seconds();
+        date_range.contains(&epoch)
+    })
+}
+
+fn committer_date(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    ensure_arg_count(func_name, args, 1, context)?;
+    let date_str = resolve_string(&args[0])?;
+    let date_range = match HgTime::parse_range(&date_str) {
+        Some(range) => range.start.unixtime..=range.end.unixtime,
+        None => return Err(crate::Error::ParseError(format!("invalid date: {}", date_str))),
+    };
+    filter_set(repo, move |commit| {
+        let committer = commit.committer();
+        let epoch = committer.when().seconds();
+        date_range.contains(&epoch)
     })
 }
 

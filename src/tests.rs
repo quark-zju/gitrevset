@@ -44,15 +44,21 @@ fn test_revset_functions() {
     assert_eq!(repo.query("committer(E)"), ["E"]);
     assert_eq!(repo.query("heads(committer(test))"), ["I", "E"]);
 
+    // date(), committerdate()
+    assert_eq!(repo.query(r#"date("0 0")"#), ["B", "A"]);
+    assert_eq!(repo.query(r#"date("0 0 to 1 0")"#), ["C", "B", "A"]);
+    assert_eq!(repo.query(r#"committerdate("before 2 0")"#), ["C", "B", "A"]);
+    assert_eq!(repo.query(r#"committerdate("since 6 0")"#), ["I", "E", "D"]);
+
     // public(), draft()
     repo.add_ref("refs/heads/master", repo.query_single_oid("E"));
     repo.add_ref("refs/remotes/origin/master", repo.query_single_oid("D"));
     repo.add_ref("refs/remotes/origin/stable", repo.query_single_oid("B"));
 
     assert_eq!(repo.query("origin/master"), ["D"]);
-    assert_eq!(repo.query("draft()"), ["I", "H", "E"]);
+    assert_eq!(repo.query("draft()"), ["E", "I", "H"]);
     assert_eq!(repo.query("public()"), ["D", "G", "F", "C", "B", "A"]);
-    assert_eq!(repo.query("drafthead()"), ["I", "E"]);
+    assert_eq!(repo.query("drafthead()"), ["E", "I"]);
     assert_eq!(repo.query("publichead()"), ["D", "B"]);
 
     // rev(), ref(), "."
