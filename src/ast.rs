@@ -148,8 +148,8 @@ impl From<Set> for Expr {
 #[macro_export]
 macro_rules! ast {
     ($v:literal) => { $crate::Expr::Name($v.to_string()) };
-    ($fname:ident ( $($arg:tt $( $subargs:tt )? ),* )) => {{
-        let args = vec![ $(ast!($arg $( $subargs )?),)* ];
+    ($fname:ident ( $($arg:tt $( ( $($subargs:tt)* ) )? ),* )) => {{
+        let args = vec![ $(ast!($arg $( ( $($subargs)* ) )?),)* ];
         $crate::Expr::Fn(stringify!($fname).into(), args)
     }};
     {$v:expr} => { $crate::Expr::from($v) };
