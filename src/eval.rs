@@ -12,6 +12,7 @@ use globset::Glob;
 use hgtime::HgTime;
 use std::collections::HashMap;
 use std::ops::Deref;
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -99,6 +100,7 @@ fn get_function<'a>(
         "committer" => Ok(&committer),
         "committerdate" => Ok(&committer_date),
         "desc" => Ok(&desc),
+        "modifies" => Ok(&modifies),
         "predecessors" => Ok(&predecessors),
         "successors" => Ok(&successors),
         "obsolete" => Ok(&obsolete),
@@ -369,6 +371,42 @@ fn desc(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Resul
     let text = resolve_string(&args[0])?;
     filter_set(repo, move |commit| {
         commit.summary().unwrap_or("").contains(&text)
+    })
+}
+
+fn modifies(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    ensure_arg_count(func_name, args, 1, context)?;
+    let path = resolve_string(&args[0])?;
+    filter_set(repo, move |commit| {
+        let path = Path::new(&path);
+        (|| -> Result<bool> {
+            let tree = commit.tree()?;
+            let entry = tree.get_path(&path)?;
+            let mut parent_not_found_count = 0;
+            let parents = commit.parents();
+            let parents_len = parents.len();
+            for parent in parents {
+                let parent_tree = parent.tree()?;
+                let parent_entry = match parent_tree.get_path(&path) {
+                    Err(e) => match e.code() {
+                        git2::ErrorCode::NotFound => {
+                            parent_not_found_count += 1;
+                            if parent_not_found_count == parents_len {
+                                return Ok(true);
+                            }
+                            continue;
+                        }
+                        _ => return Ok(true),
+                    },
+                    Ok(entry) => entry,
+                };
+                if parent_entry.id() != entry.id() || parent_entry.filemode() != entry.filemode() {
+                    return Ok(true);
+                }
+            }
+            Ok(false)
+        })()
+        .unwrap_or(false)
     })
 }
 

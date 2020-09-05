@@ -38,6 +38,7 @@
 //! - `date(date)`: Filter by author date.
 //! - `committerdate(date)`: Filter by committer date.
 //! - `desc(text)`: Filter by commit message.
+//! - `modifies(path)`: Filter by modified path.
 //! - `predecessors(x)`: Previous versions of `x`, including `x`.
 //! - `successors(x)`: Newer versions of `x`, including `x`.
 //! - `obsolete()`: Commits with at least one newer versions.

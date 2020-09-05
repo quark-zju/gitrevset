@@ -44,6 +44,7 @@ fn test_revset_functions() {
     assert_eq!(repo.query("heads(author(test))"), ["I", "E"]);
     assert_eq!(repo.query("committer(E)"), ["E"]);
     assert_eq!(repo.query("heads(committer(test))"), ["I", "E"]);
+    assert_eq!(repo.query("modifies(B)"), ["B"]);
 
     // date(), committerdate()
     assert_eq!(repo.query(r#"date("0 0")"#), ["B", "A"]);
