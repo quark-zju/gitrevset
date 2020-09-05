@@ -55,9 +55,16 @@ impl Expr {
                     *self = to.clone();
                 }
             }
-            Expr::Fn(_name, args) => {
-                for arg in args {
-                    arg.replace(from, to);
+            Expr::Fn(name, args) => {
+                // Special case: hold the first argument of "apply" unchanged.
+                if name == "apply" && args.len() > 1 {
+                    for arg in &mut args[1..] {
+                        arg.replace(from, to);
+                    }
+                } else {
+                    for arg in args {
+                        arg.replace(from, to);
+                    }
                 }
             }
             Expr::Inlined(_) => (),

@@ -104,6 +104,7 @@ fn get_function<'a>(
         "tag" => Ok(&tag),
         "present" => Ok(&present),
         "empty" => Ok(&empty),
+        "apply" => Ok(&apply),
         _ => Err(Error::UnresolvedName(name.to_string())),
     }
 }
@@ -510,6 +511,29 @@ fn present(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Re
 fn empty(func_name: &str, _repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
     ensure_arg_count(func_name, args, 0, context)?;
     Ok(Set::empty())
+}
+
+fn apply(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    if args.len() < 1 {
+        return Err(Error::MismatchedArguments(
+            func_name.to_string(),
+            1,
+            args.len(),
+        ));
+    }
+
+    let arg_sets = args[1..]
+        .iter()
+        .map(|arg| resolve_set(repo, arg, context))
+        .collect::<Result<Vec<_>>>()?;
+
+    let mut expr = args[0].clone();
+    for (i, set) in arg_sets.into_iter().enumerate() {
+        let to_replace = format!("${}", i + 1);
+        expr.replace(&to_replace, &Expr::Inlined(set))
+    }
+
+    resolve_set(repo, &expr, context)
 }
 
 fn normalize_hex(s: &str) -> Option<Vec<u8>> {

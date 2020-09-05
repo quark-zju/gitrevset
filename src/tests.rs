@@ -95,6 +95,11 @@ fn test_revset_functions() {
     assert_eq!(repo.query("predecessors(H)"), ["H_new", "H"]);
     assert_eq!(repo.query("successors(H_old)"), ["H_new", "H"]);
     assert_eq!(repo.query("obsolete()"), ["H"]);
+
+    // apply
+    assert_eq!(repo.query("apply($1, .)"), ["E"]);
+    assert_eq!(repo.query("apply($1 + $2^, ., B)"), ["E", "A"]);
+    assert_eq!(repo.query("apply(apply($1, C) + $1, A)"), ["C", "A"]);
 }
 
 #[test]
