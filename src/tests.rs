@@ -103,6 +103,21 @@ fn test_revset_functions() {
 }
 
 #[test]
+fn test_revset_alias_config() {
+    let mut repo = TestRepo::new();
+    repo.drawdag("A--B--C");
+    repo.set_config("revsetalias.t", "B");
+    repo.set_config("revsetalias.f", "$1^^ + $1");
+    repo.set_config("revsetalias.g", "apply(f($1), children($1))");
+
+    assert_eq!(repo.query_with_alias_config("t"), ["B"]);
+    assert_eq!(repo.query_with_alias_config("t()"), ["B"]);
+    assert_eq!(repo.query_with_alias_config("f(C)"), ["C", "A"]);
+    assert_eq!(repo.query_with_alias_config("f(t())"), ["B"]);
+    assert_eq!(repo.query_with_alias_config("g(t)"), ["C", "A"]);
+}
+
+#[test]
 fn test_ast_macro() {
     use crate::ast;
     let f = |e| format!("{:?}", e);

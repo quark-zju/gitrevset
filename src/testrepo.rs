@@ -59,6 +59,11 @@ impl TestRepo {
         self.desc_set(&self.revs(code).unwrap())
     }
 
+    /// Run revset query with aliases. Return commit messages.
+    pub fn query_with_alias_config(&self, code: &str) -> Vec<String> {
+        self.desc_set(&self.anyrevs(code).unwrap())
+    }
+
     /// Set -> Commit messages.
     pub fn desc_set(&self, set: &Set) -> Vec<String> {
         let mut result = Vec::new();
@@ -109,6 +114,13 @@ impl TestRepo {
             .reference(&old_ref_name, oid, true, "before amend")
             .unwrap();
         self.reload();
+    }
+
+    /// Set git configs.
+    pub fn set_config(&mut self, name: &str, value: &str) {
+        let git_repo = self.git_repo();
+        let mut config = git_repo.config().unwrap();
+        config.set_str(name, value).unwrap();
     }
 
     /// Update environment variable so open_from_env will open this repo.
