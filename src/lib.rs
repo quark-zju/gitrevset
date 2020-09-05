@@ -47,7 +47,7 @@
 //! - `ref(name)`: Resolve commits by a reference name or glob.
 //! - `tag()`: All tags.
 //! - `tag(name)`: Resolve commits by a tag name or glob.
-//! - `empty()`: Empty set.
+//! - `none()`: Empty set.
 //! - `present(set)`: Empty set on "unresolved name" error. Otherwise just `set`.
 //! - `apply(expr, $1, $2, ...)`: Replace `$1`, `$2` in `expr` with evaluated
 //!    sets. Then evaluate `expr`. Useful to avoid evaluate same sets multiple

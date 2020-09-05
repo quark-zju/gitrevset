@@ -108,7 +108,7 @@ fn get_function<'a>(
         "ref" => Ok(&r#ref),
         "tag" => Ok(&tag),
         "present" => Ok(&present),
-        "empty" => Ok(&empty),
+        "none" => Ok(&none),
         "apply" => Ok(&apply),
         _ => Err(Error::UnresolvedName(name.to_string())),
     }
@@ -549,7 +549,7 @@ fn present(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Re
     }
 }
 
-fn empty(func_name: &str, _repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+fn none(func_name: &str, _repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
     ensure_arg_count(func_name, args, 0, context)?;
     Ok(Set::empty())
 }
