@@ -5,8 +5,22 @@ use gitdag::dag::Vertex;
 use gitdag::git2::Oid;
 use std::collections::HashMap;
 
+/// Extended methods on `Oid`.
 pub trait OidExt {
+    /// Convert to `Vertex`.
     fn to_vertex(&self) -> Vertex;
+}
+
+/// Extended methods on `Vertex`.
+pub trait VertexExt {
+    /// Convert to `Oid`.
+    fn to_oid(&self) -> Result<Oid>;
+}
+
+/// Extended methods on `Oid` iterator.
+pub trait OidIterExt {
+    /// Convert to `Set`.
+    fn to_set(self) -> Set;
 }
 
 impl OidExt for Oid {
@@ -15,7 +29,19 @@ impl OidExt for Oid {
     }
 }
 
-pub trait Merge {
+impl VertexExt for Vertex {
+    fn to_oid(&self) -> Result<Oid> {
+        Ok(Oid::from_bytes(self.as_ref())?)
+    }
+}
+
+impl<T: IntoIterator<Item = Oid>> OidIterExt for T {
+    fn to_set(self) -> Set {
+        Set::from_static_names(self.into_iter().map(|oid| oid.to_vertex()))
+    }
+}
+
+pub(crate) trait Merge {
     fn merge(&mut self, other: Self);
 }
 

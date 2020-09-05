@@ -118,6 +118,34 @@ fn test_revset_alias_config() {
 }
 
 #[test]
+fn test_ext() {
+    use crate::ext::OidExt;
+    use crate::ext::OidIterExt;
+    use crate::ext::SetExt;
+    use crate::ext::VertexExt;
+    use gitdag::git2::Oid;
+
+    let oid = Oid::zero();
+    let v = oid.to_vertex();
+    assert_eq!(oid, v.to_oid().unwrap());
+
+    let oid2 = {
+        let mut bytes = oid.as_bytes().to_vec();
+        bytes[0] ^= 1;
+        Oid::from_bytes(&bytes).unwrap()
+    };
+    let oid_list = [oid, oid2];
+    let set = oid_list.to_vec().to_set();
+    assert_eq!(
+        oid_list.to_vec(),
+        set.to_oids()
+            .unwrap()
+            .collect::<crate::Result<Vec<_>>>()
+            .unwrap()
+    );
+}
+
+#[test]
 fn test_ast_macro() {
     use crate::ast;
     let f = |e| format!("{:?}", e);
