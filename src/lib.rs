@@ -148,10 +148,12 @@
 #![allow(dead_code)]
 #![deny(missing_docs)]
 
+/// Extended methods on types defined in other crates.
+pub mod ext;
+
 mod ast;
 mod error;
 mod eval;
-mod ext;
 mod mutation;
 mod parser;
 mod repo;
