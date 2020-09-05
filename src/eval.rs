@@ -101,7 +101,9 @@ fn get_function<'a>(
         "obsolete" => Ok(&obsolete),
         "id" => Ok(&id),
         "ref" => Ok(&r#ref),
-        "tag" => Ok(&r#tag),
+        "tag" => Ok(&tag),
+        "present" => Ok(&present),
+        "empty" => Ok(&empty),
         _ => Err(Error::UnresolvedName(name.to_string())),
     }
 }
@@ -494,6 +496,20 @@ fn tag(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result
         }
     }
     Err(Error::UnresolvedName(name))
+}
+
+fn present(func_name: &str, repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    ensure_arg_count(func_name, args, 1, context)?;
+    match resolve_set(repo, &args[0], context) {
+        Err(Error::UnresolvedName(_)) => Ok(Set::empty()),
+        Err(e) => Err(e),
+        Ok(set) => Ok(set),
+    }
+}
+
+fn empty(func_name: &str, _repo: &Repo, args: &[Expr], context: &Context) -> Result<Set> {
+    ensure_arg_count(func_name, args, 0, context)?;
+    Ok(Set::empty())
 }
 
 fn normalize_hex(s: &str) -> Option<Vec<u8>> {

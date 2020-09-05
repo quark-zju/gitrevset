@@ -46,6 +46,8 @@
 //! - `ref(name)`: Resolve commits by a reference name or glob.
 //! - `tag()`: All tags.
 //! - `tag(name)`: Resolve commits by a tag name or glob.
+//! - `empty()`: Empty set.
+//! - `present(set)`: Empty set on "unresolved name" error. Otherwise just `set`.
 //!
 //! Differences from Mercurial:
 //! 1. `x + y` does not make sure `y` comes after `x`. For example,

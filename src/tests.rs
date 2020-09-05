@@ -83,6 +83,11 @@ fn test_revset_functions() {
     assert_eq!(repo.query("tag(v2)"), ["B"]);
     assert_eq!(repo.query(r#"tag("v*")"#), ["B", "A"]);
 
+    // empty(), present()
+    assert!(repo.query("empty()").is_empty());
+    assert!(repo.query("present(foobar)").is_empty());
+    assert_eq!(repo.query("present(master)"), ["E"]);
+
     // predecessors(), successors()
     repo.amend("refs/heads/H");
     assert_eq!(repo.query("H"), ["H_new"]);
