@@ -48,6 +48,9 @@ fn lookup(repo: &Repo, name: &str, context: &Context) -> Result<Set> {
     if let Some(set) = context.names.get(name) {
         return Ok(set.clone());
     }
+    if let Some(func) = context.fns.get(name) {
+        return func(name, repo, &[], context);
+    }
 
     let args = [Expr::Name(name.to_string())];
 
