@@ -64,3 +64,19 @@ let head = repo.revs(ast!(heads({ stack })))?;
 ```bash
 git revs "(draft() & ::.)^ + ."
 ```
+
+### Configuration
+
+Customized revset aliases or functions can be defined in git config:
+
+```ini
+[revsetalias]
+d = draft()
+f = ancestor($1, origin/master):$1
+```
+
+Then they can be used in `git-revs` or using the `repo.anyrevs` API.
+
+```bash
+git revs "f(d)"
+```
