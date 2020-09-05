@@ -1,9 +1,12 @@
 # gitrevset
 
+[![Documentation](https://docs.rs/gitrevset/badge.svg)](https://docs.rs/gitrevset)
+![Build Status](https://github.com/quark-zju/gitrevset/workflows/build/badge.svg)
+
 A domain-specific-language to select commits in a git repo. Similar to
 [Mercurial's revset](https://www.mercurial-scm.org/repo/hg/help/revsets).
 
-See the crate documentation for supported functions and operators. More functions might be added over time.
+See [the crate documentation](https://docs.rs/gitrevset/#language-specification) for supported functions and operators. More functions might be added over time.
 
 `gitrevset` provides the Rust library interface. There is also a simple command-line utility `git-revs`. It takes revset expressions as arguments, and outputs commit hashes.
 
