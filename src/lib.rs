@@ -98,7 +98,7 @@
 //! let set = repo.revs("(draft() & ::.)^ + .")?;
 //!
 //! // With user-defined aliases considered.
-//! // ex. git config revsetalias.foo 'parents($1)'
+//! // ex. git config revsetalias.foo "parents($1)"
 //! let set = repo.anyrevs("foo(.)")?;
 //! # }
 //! # Ok(())
