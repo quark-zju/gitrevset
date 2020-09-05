@@ -1,6 +1,7 @@
 use crate::Error;
 use crate::Result;
 use gitdag::dag::Set;
+use gitdag::git2::Oid;
 use std::borrow::Cow;
 use std::fmt;
 
@@ -104,6 +105,13 @@ impl From<&str> for Expr {
 impl From<Set> for Expr {
     fn from(s: Set) -> Expr {
         Expr::Inlined(s)
+    }
+}
+
+impl From<Oid> for Expr {
+    fn from(oid: Oid) -> Expr {
+        use crate::ext::OidExt;
+        Expr::Inlined(oid.to_vertex().into())
     }
 }
 
