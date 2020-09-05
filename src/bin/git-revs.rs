@@ -16,7 +16,7 @@ fn try_main() -> Result<()> {
             let ast = Expr::parse(arg)?;
             println!("{:?}", ast);
         } else {
-            let set = repo.revs(arg)?;
+            let set = repo.anyrevs(arg)?;
             for v in set.iter()? {
                 println!("{}", v?.to_hex());
             }
